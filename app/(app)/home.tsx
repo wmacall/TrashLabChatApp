@@ -1,11 +1,15 @@
-import {Text, View} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {Text, TextInput, View} from 'react-native';
 
 const Home = () => {
   return (
     <View>
-      <SafeAreaView />
-      <Text>Home</Text>
+      <View>
+        <Text>Chats</Text>
+        <TextInput placeholder="Search" />
+      </View>
+      <View>
+        <Text>Start creating conversations</Text>
+      </View>
     </View>
   );
 };

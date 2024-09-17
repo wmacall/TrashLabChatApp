@@ -31,8 +31,7 @@ export const AuthContextProvider = ({children}: Props) => {
   const onLogin = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      const response = await signInWithEmailAndPassword(auth, email, password);
-      console.log(response);
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
       const errorMessage = getMessageFromError(error);
       Alert.alert('Error', errorMessage);
@@ -43,12 +42,7 @@ export const AuthContextProvider = ({children}: Props) => {
   const onRegister = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const response = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-      console.log(response);
+      await createUserWithEmailAndPassword(auth, email, password);
       setIsLoading(false);
     } catch (error) {
       const errorMessage = getMessageFromError(error);
@@ -58,7 +52,6 @@ export const AuthContextProvider = ({children}: Props) => {
   };
 
   useEffect(() => {
-    setIsAuthenticated(true);
     const unsubscribe = onAuthStateChanged(auth, user => {
       if (user) {
         setUser(user);

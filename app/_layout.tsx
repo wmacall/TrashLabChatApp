@@ -13,9 +13,9 @@ const MainLayout = () => {
       return;
     }
     const isLogged = segments[0] === '(app)';
-    console.log({segments});
+    console.log(isAuthenticated && !isLogged);
     if (isAuthenticated && !isLogged) {
-      replace('/(app)/home');
+      replace('/home');
     } else if (!isAuthenticated) {
       replace('/signIn');
     }
