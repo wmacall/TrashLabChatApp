@@ -1,11 +1,11 @@
-import {Text, View} from 'react-native';
+import {ActivityIndicator, View} from 'react-native';
 
-const Home = () => {
+const SplashScreen = () => {
   return (
     <View>
-      <Text>Home</Text>
+      <ActivityIndicator size="large" />
     </View>
   );
 };
 
-export default Home;
+export default SplashScreen;
