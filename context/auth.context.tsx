@@ -5,10 +5,11 @@ import {
   onAuthStateChanged,
   User,
 } from 'firebase/auth';
-import {auth} from '../firebase';
+import {auth, db} from '../firebase';
 import {FirebaseError} from 'firebase/app';
 import {Alert} from 'react-native';
 import {getMessageFromError} from '@/utils/getMessageFromError';
+import {doc, setDoc} from 'firebase/firestore';
 
 type Props = {
   children: ReactNode;
@@ -19,7 +20,7 @@ export const AuthContext = createContext({
   isAuthenticated: null as boolean | null,
   onLogin: (_email: string, _password: string) => {},
   onLogout: () => {},
-  onRegister: (_email: string, _password: string) => {},
+  onRegister: (_email: string, username: string, _password: string) => {},
   isLoading: false,
 });
 
@@ -39,10 +40,23 @@ export const AuthContextProvider = ({children}: Props) => {
     }
   };
   const onLogout = () => {};
-  const onRegister = async (email: string, password: string) => {
+  const onRegister = async (
+    email: string,
+    username: string,
+    password: string,
+  ) => {
     setIsLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const response = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+      await setDoc(doc(db, 'users', response.user.uid), {
+        email,
+        username,
+        uuid: response.user.uid,
+      });
       setIsLoading(false);
     } catch (error) {
       const errorMessage = getMessageFromError(error);

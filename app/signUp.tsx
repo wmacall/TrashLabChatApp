@@ -16,6 +16,7 @@ import {useAuthContext} from '@/context/auth.context';
 interface SignInValues {
   email: string;
   password: string;
+  username: string;
 }
 
 interface InputProps extends TextInputProps {
@@ -56,11 +57,12 @@ export default function SignUp() {
     defaultValues: {
       email: '',
       password: '',
+      username: '',
     },
   });
 
   const handleSignUp: SubmitHandler<SignInValues> = values =>
-    onRegister(values.email, values.password);
+    onRegister(values.email, values.username, values.password);
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
@@ -74,6 +76,12 @@ export default function SignUp() {
           name="email"
           keyboardType="email-address"
           placeholder="Email"
+          autoCapitalize="none"
+        />
+        <Input
+          control={control}
+          name="username"
+          placeholder="Username"
           autoCapitalize="none"
         />
         <Input

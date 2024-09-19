@@ -26,7 +26,7 @@ const MainLayout = () => {
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: {backgroundColor: '#fff'},
+          contentStyle: {backgroundColor: 'white', flex: 1},
         }}
       />
     </View>
