@@ -1,62 +1,31 @@
-import {
-  ActivityIndicator,
-  Image,
-  KeyboardAvoidingView,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  TextInputProps,
-  View,
-} from 'react-native';
-import {Control, SubmitHandler, useController, useForm} from 'react-hook-form';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {Controller, SubmitHandler, useForm} from 'react-hook-form';
 import {useRouter} from 'expo-router';
 import {useAuthContext} from '@/context/auth.context';
+import {
+  Button,
+  ButtonText,
+  Heading,
+  Input,
+  KeyboardAvoidingView,
+  View,
+} from '@gluestack-ui/themed';
+import {InputField} from '@gluestack-ui/themed';
+import {Text} from '@gluestack-ui/themed';
+import {Image} from '@gluestack-ui/themed';
+import {ButtonSpinner} from '@gluestack-ui/themed';
 
 interface SignInValues {
   email: string;
   password: string;
 }
 
-interface InputProps extends TextInputProps {
-  control: Control<SignInValues, any>;
-  name: keyof SignInValues;
-}
-
-const Input = ({control, name, ...rest}: InputProps) => {
-  const {field} = useController({
-    control,
-    name,
-  });
-  return (
-    <TextInput
-      placeholder="Email"
-      value={field.value}
-      onChangeText={field.onChange}
-      style={inputStyles.input}
-      placeholderTextColor="#9e9e9e"
-      {...rest}
-    />
-  );
-};
-
-const inputStyles = StyleSheet.create({
-  input: {
-    padding: 16,
-    borderRadius: 16,
-    marginVertical: 8,
-    backgroundColor: '#eeeeee',
-  },
-});
-
 export default function SignIn() {
   const {push} = useRouter();
   const {onLogin, isLoading} = useAuthContext();
   const {control, handleSubmit} = useForm<SignInValues>({
     defaultValues: {
-      email: 'test@test.com',
-      password: 'Admin123!',
+      email: '',
+      password: '',
     },
   });
 
@@ -66,112 +35,79 @@ export default function SignIn() {
   const handleSignUp = () => push('/signUp');
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior="padding">
-      <View style={styles.containerImage}>
-        <Image
-          source={require('../assets/images/login.jpg')}
-          style={styles.image}
-        />
-      </View>
-      <View style={styles.containerSignIn}>
-        <Text style={styles.textLogin}>Log In</Text>
-        <Input
-          control={control}
-          name="email"
-          keyboardType="email-address"
-          placeholder="Email"
-          autoCapitalize="none"
-        />
-        <Input
-          control={control}
-          name="password"
-          secureTextEntry
-          placeholder="Password"
-        />
-        <Pressable
-          style={styles.buttonSignIn}
-          onPress={handleSubmit(handleSignIn)}>
-          {!isLoading ? (
-            <Text style={styles.textButtonSignIn}>Sign In</Text>
-          ) : (
-            <ActivityIndicator color="#fff" size="small" />
-          )}
-        </Pressable>
-        <View style={styles.containerOr}>
-          <View style={styles.line} />
-          <Text style={styles.orText}>Or</Text>
-          <View style={styles.line} />
+    <KeyboardAvoidingView behavior="padding" flex={1}>
+      <Heading
+        bg="$primary700"
+        textAlign="center"
+        fontSize={24}
+        fontWeight="bold"
+        zIndex={10}
+        color="white"
+        py="$4">
+        Sign In
+      </Heading>
+      <View
+        px="$4"
+        flex={1}
+        flexDirection="column"
+        justifyContent="space-between"
+        pb="$4">
+        <View flex={1} alignItems="center" justifyContent="center">
+          <Image
+            source={require('../assets/images/logo.png')}
+            resizeMode="contain"
+            alt="Logo"
+            h={120}
+            w={200}
+          />
+          <Controller
+            render={({field}) => (
+              <Input mt="$4" rounded="$2xl" size="lg">
+                <InputField
+                  placeholder="Enter your email"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  keyboardType="email-address"
+                />
+              </Input>
+            )}
+            name="email"
+            control={control}
+          />
+          <Controller
+            render={({field}) => (
+              <Input mt="$4" rounded="$2xl" size="lg">
+                <InputField
+                  type="password"
+                  placeholder="Enter your password"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                />
+              </Input>
+            )}
+            name="password"
+            control={control}
+          />
         </View>
-        <Pressable onPress={handleSignUp} style={styles.buttonSignUp}>
-          <Text style={styles.textButtonSignUp}>Sign Up</Text>
-        </Pressable>
+        <View>
+          <Button
+            bg="$primary700"
+            onPress={handleSubmit(handleSignIn)}
+            rounded="$xl">
+            {!isLoading ? <ButtonText>Sign In</ButtonText> : <ButtonSpinner />}
+          </Button>
+          <View flexDirection="row" alignItems="center" my="$2">
+            <View h={1} flex={1} w={16} bg="$coolGray200" />
+            <Text color="$coolGray400" mx="$2">
+              or
+            </Text>
+            <View flex={1} h={1} w={16} bg="$coolGray200" />
+          </View>
+          <Button bg="$coolGray400" onPress={handleSignUp} rounded="$xl">
+            <ButtonText>Sign Up</ButtonText>
+          </Button>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-  },
-  containerImage: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    width: 300,
-    height: 300,
-  },
-  containerSignIn: {
-    flex: 1,
-    paddingTop: 16,
-    paddingBottom: 64,
-  },
-  textLogin: {
-    fontSize: 32,
-    fontWeight: '500',
-    marginBottom: 72,
-  },
-  buttonSignIn: {
-    backgroundColor: '#3f51b5',
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 16,
-    marginTop: 48,
-  },
-  textButtonSignIn: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  containerOr: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: 16,
-  },
-  line: {
-    height: 1,
-    flex: 1,
-    backgroundColor: '#9e9e9e',
-  },
-  orText: {
-    marginHorizontal: 16,
-    color: '#757575',
-  },
-  buttonSignUp: {
-    backgroundColor: '#e0e0e0',
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 16,
-  },
-  textButtonSignUp: {
-    color: '#616161',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-});

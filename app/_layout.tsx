@@ -7,6 +7,7 @@ import {
   Text,
   Box,
   SafeAreaView,
+  ScrollView,
 } from '@gluestack-ui/themed';
 import {config} from '@gluestack-ui/config';
 
@@ -36,6 +37,7 @@ const MainLayout = () => {
           contentStyle: {backgroundColor: 'white', flex: 1},
         }}
       />
+      <SafeAreaView />
     </View>
   );
 };
