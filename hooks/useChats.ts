@@ -23,25 +23,31 @@ export const useChat = (handlePressShowModal?: () => void) => {
   const handleGetChats = () => {
     setIsLoading(true);
     const roomsRef = collection(db, 'rooms');
-    const queryForRooms = query(roomsRef, where('createdBy', '==', user?.uid));
-
-    const unsubscribe = onSnapshot(queryForRooms, async roomsSnapshot => {
+    const unsubscribe = onSnapshot(roomsRef, async roomsSnapshot => {
       let rooms: UserChat[] = [];
       const guestPromises = roomsSnapshot.docs.map(async doc => {
         const data = doc.data() as UserChat;
+        const roomId = doc.id;
+        const [user1, user2] = roomId.split('-');
 
-        const guestRef = collection(db, 'users');
-        const queryForGuest = query(guestRef, where('uuid', '==', data.guest));
-        const guestSnapshot = await getDocs(queryForGuest);
-
-        let guestUser: User | null = null;
-        guestSnapshot.forEach(doc => {
-          guestUser = doc.data() as User;
-        });
-        return {...data, guestUser, roomId: doc.id};
+        if (user1 === user?.uid || user2 === user?.uid) {
+          const guestRef = collection(db, 'users');
+          const queryForGuest = query(
+            guestRef,
+            where('uuid', '==', data.guest),
+          );
+          const guestSnapshot = await getDocs(queryForGuest);
+          let guestUser: User | null = null;
+          guestSnapshot.forEach(doc => {
+            guestUser = doc.data() as User;
+          });
+          return {...data, guestUser, roomId: doc.id};
+        }
+        return null;
       });
-
-      rooms = await Promise.all(guestPromises);
+      rooms = (await Promise.all(guestPromises)).filter(
+        room => room !== null,
+      ) as UserChat[];
       setUserChats(rooms);
       setIsLoading(false);
     });

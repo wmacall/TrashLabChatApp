@@ -1,10 +1,8 @@
 import {useAuthContext} from '@/context/auth.context';
-import {db, storage} from '@/firebase';
-import {Ionicons} from '@expo/vector-icons';
+import {db} from '@/firebase';
 import {ChevronLeftIcon, Pressable, Toast} from '@gluestack-ui/themed';
 import {Heading, Icon, View} from '@gluestack-ui/themed';
 import {router, useLocalSearchParams} from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
 import {
   addDoc,
   collection,
@@ -12,28 +10,18 @@ import {
   onSnapshot,
   orderBy,
   query,
-  setDoc,
   updateDoc,
 } from 'firebase/firestore';
 import React, {useState, useCallback, useEffect} from 'react';
-import {SafeAreaView, Text} from 'react-native';
+import {SafeAreaView} from 'react-native';
 import {
   Composer,
   GiftedChat,
   IMessage,
   InputToolbar,
-  Send,
-  MessageImage,
-  Bubble,
-  Time,
 } from 'react-native-gifted-chat';
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  listAll,
-} from 'firebase/storage';
+import {ChatBubble} from '@/components/ChatBubble';
+import {ChatMessage, ChatSend} from '@/components';
 
 const Messages = () => {
   const params = useLocalSearchParams();
@@ -103,27 +91,6 @@ const Messages = () => {
 
   const handleGoBack = () => router.back();
 
-  const uploadToFirebase = async (uri: string) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const storageRef = ref(storage, 'chats/' + new Date().getTime());
-
-    const uploadTask = uploadBytesResumable(storageRef, blob);
-    uploadTask.on(
-      'state_changed',
-      snapshot => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      },
-      error => {},
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then(async downloadURL => {
-          onSendImage(downloadURL);
-        });
-      },
-    );
-  };
-
   const onSendImage = async (imageURL: string) => {
     const message: IMessage = {
       _id: new Date().getTime(),
@@ -153,23 +120,6 @@ const Messages = () => {
         sender: user?.uid,
       },
     });
-  };
-
-  const pickImage = async () => {
-    try {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-
-      if (!result.canceled) {
-        const resultImage = await uploadToFirebase(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   return (
@@ -216,93 +166,9 @@ const Messages = () => {
             }}
           />
         )}
-        renderBubble={props => {
-          const isCurrentUser = props.currentMessage?.user._id === user?.uid;
-          const isImageMessage = !!props.currentMessage?.image;
-
-          let backgroundColor;
-          if (isImageMessage) {
-            backgroundColor = '#d3d3d3';
-          } else if (isCurrentUser) {
-            backgroundColor = '#ff6347';
-          } else {
-            backgroundColor = '#32cd32';
-          }
-
-          return (
-            <Bubble
-              {...props}
-              wrapperStyle={{
-                left: {
-                  marginVertical: 5,
-                  backgroundColor: isImageMessage ? '#f3f4f6' : '#32cd32',
-                },
-                right: {
-                  marginVertical: 5,
-                  backgroundColor: isImageMessage ? '#f3f4f6' : '#ff6347',
-                },
-              }}
-              renderTime={props => (
-                <Time
-                  {...props}
-                  timeTextStyle={{
-                    left: {
-                      color: isImageMessage ? '#404040' : '#fff',
-                    },
-                    right: {
-                      color: isImageMessage ? '#404040' : '#fff',
-                    },
-                  }}
-                />
-              )}
-              tickStyle={{
-                color: 'blue',
-              }}
-            />
-          );
-        }}
-        renderMessageImage={props => (
-          <MessageImage
-            {...props}
-            containerStyle={{
-              backgroundColor: '#f3f4f6',
-              marginVertical: 10,
-            }}
-            imageStyle={{
-              backgroundColor: '#f3f4f6',
-              width: 200,
-              height: 200,
-              borderRadius: 10,
-            }}
-          />
-        )}
-        renderSend={props => (
-          <>
-            <Send
-              {...props}
-              disabled={!props.text}
-              alwaysShowSend
-              containerStyle={{
-                width: 44,
-                height: 44,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginHorizontal: 4,
-              }}>
-              <View bg="$primary700" rounded="$full" p="$2">
-                <Ionicons name="send" size={14} color="white" />
-              </View>
-            </Send>
-            <Pressable
-              onPress={pickImage}
-              bg="$primary700"
-              mr="$4"
-              rounded="$full"
-              p="$2">
-              <Ionicons name="images" size={14} color="white" />
-            </Pressable>
-          </>
-        )}
+        renderBubble={props => <ChatBubble {...props} />}
+        renderMessageImage={props => <ChatMessage {...props} />}
+        renderSend={props => <ChatSend onSendImage={onSendImage} {...props} />}
         user={{
           _id: user?.uid as string,
         }}

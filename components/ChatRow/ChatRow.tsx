@@ -5,8 +5,14 @@ import {useAuthContext} from '@/context/auth.context';
 
 interface ChatRowProps extends UserChat {}
 
-export const ChatRow = ({guestUser, roomId, lastMessage}: ChatRowProps) => {
+export const ChatRow = ({
+  guestUser,
+  roomId,
+  lastMessage,
+  ...rest
+}: ChatRowProps) => {
   const {user} = useAuthContext();
+  console.log({guestUser, ...rest, user: user?.uid});
   const handlePressRow = () => {
     router.push({
       pathname: '/messages',
