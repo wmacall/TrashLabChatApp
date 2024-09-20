@@ -1,7 +1,14 @@
+import {useEffect} from 'react';
+import {StatusBar, View} from 'react-native';
 import {AuthContextProvider, useAuthContext} from '@/context/auth.context';
 import {Slot, Stack, useRouter, useSegments} from 'expo-router';
-import {useEffect} from 'react';
-import {SafeAreaView, View} from 'react-native';
+import {
+  GluestackUIProvider,
+  Text,
+  Box,
+  SafeAreaView,
+} from '@gluestack-ui/themed';
+import {config} from '@gluestack-ui/config';
 
 const MainLayout = () => {
   const {isAuthenticated} = useAuthContext();
@@ -22,7 +29,8 @@ const MainLayout = () => {
   }, [isAuthenticated]);
   return (
     <View style={{flex: 1}}>
-      <SafeAreaView />
+      <SafeAreaView bg="$primary700" />
+      <StatusBar barStyle="light-content" />
       <Stack
         screenOptions={{
           headerShown: false,
@@ -35,9 +43,11 @@ const MainLayout = () => {
 
 const _layout = () => {
   return (
-    <AuthContextProvider>
-      <MainLayout />
-    </AuthContextProvider>
+    <GluestackUIProvider config={config}>
+      <AuthContextProvider>
+        <MainLayout />
+      </AuthContextProvider>
+    </GluestackUIProvider>
   );
 };
 

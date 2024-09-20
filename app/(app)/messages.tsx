@@ -1,5 +1,8 @@
 import {useAuthContext} from '@/context/auth.context';
 import {db} from '@/firebase';
+import {ChevronLeftIcon, Pressable} from '@gluestack-ui/themed';
+import {Heading, Icon, View} from '@gluestack-ui/themed';
+import {router} from 'expo-router';
 import {
   addDoc,
   collection,
@@ -9,11 +12,12 @@ import {
   query,
 } from 'firebase/firestore';
 import React, {useState, useCallback, useEffect} from 'react';
-import {SafeAreaView, Text, View} from 'react-native';
+import {SafeAreaView, Text} from 'react-native';
 import {GiftedChat, IMessage} from 'react-native-gifted-chat';
 
 const Messages = () => {
   const [messages, setMessages] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const {user} = useAuthContext();
 
   useEffect(() => {
@@ -35,6 +39,7 @@ const Messages = () => {
         };
       });
       setMessages(messages);
+      setIsLoading(false);
     });
 
     return () => {
@@ -67,13 +72,19 @@ const Messages = () => {
     [user?.uid],
   );
 
-  console.log(messages.map((message: any) => message.user._id));
+  const handleGoBack = () => router.back();
 
   return (
     <>
-      <View>
-        <Text>Messages</Text>
+      <View flexDirection="row" alignItems="center" bg="$primary700">
+        <Pressable onPress={handleGoBack} height="$full" px="$4" py="$4">
+          <Icon as={ChevronLeftIcon} color="$white" size="xl" />
+        </Pressable>
+        <Heading color="$white" size="md">
+          Diego Smith
+        </Heading>
       </View>
+
       <GiftedChat
         messages={messages}
         onSend={messages => onSend(messages)}
