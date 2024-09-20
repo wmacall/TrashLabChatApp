@@ -1,6 +1,7 @@
 import {useAuthContext} from '@/context/auth.context';
 import {db} from '@/firebase';
-import {ChevronLeftIcon, Pressable} from '@gluestack-ui/themed';
+import {Ionicons} from '@expo/vector-icons';
+import {Box, ChevronLeftIcon, Pressable} from '@gluestack-ui/themed';
 import {Heading, Icon, View} from '@gluestack-ui/themed';
 import {router} from 'expo-router';
 import {
@@ -13,7 +14,13 @@ import {
 } from 'firebase/firestore';
 import React, {useState, useCallback, useEffect} from 'react';
 import {SafeAreaView, Text} from 'react-native';
-import {GiftedChat, IMessage} from 'react-native-gifted-chat';
+import {
+  Composer,
+  GiftedChat,
+  IMessage,
+  InputToolbar,
+  Send,
+} from 'react-native-gifted-chat';
 
 const Messages = () => {
   const [messages, setMessages] = useState<any>([]);
@@ -88,6 +95,53 @@ const Messages = () => {
       <GiftedChat
         messages={messages}
         onSend={messages => onSend(messages)}
+        showAvatarForEveryMessage={false}
+        renderAvatar={null}
+        listViewProps={{
+          showsVerticalScrollIndicator: false,
+        }}
+        messagesContainerStyle={{
+          backgroundColor: '#fff',
+        }}
+        renderInputToolbar={props => (
+          <InputToolbar
+            {...props}
+            containerStyle={{
+              paddingTop: 6,
+              borderTopWidth: 0,
+            }}
+            primaryStyle={{alignItems: 'center', flexDirection: 'row'}}
+          />
+        )}
+        renderComposer={props => (
+          <Composer
+            {...props}
+            placeholderTextColor="#404040"
+            placeholder="Type a message..."
+            textInputStyle={{
+              backgroundColor: '#f3f4f6',
+              borderRadius: 20,
+              paddingHorizontal: 16,
+            }}
+          />
+        )}
+        renderSend={props => (
+          <Send
+            {...props}
+            disabled={!props.text}
+            alwaysShowSend
+            containerStyle={{
+              width: 44,
+              height: 44,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginHorizontal: 4,
+            }}>
+            <View bg="$primary700" rounded="$full" p="$2">
+              <Ionicons name="send" size={14} color="white" />
+            </View>
+          </Send>
+        )}
         user={{
           _id: user?.uid as string,
         }}
