@@ -1,5 +1,5 @@
-import React from 'react';
-import {Modal} from 'react-native';
+import React, {useRef, useState} from 'react';
+import {FlatList, Modal} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {
   Heading,
@@ -9,8 +9,14 @@ import {
   InputSlot,
   Pressable,
   SearchIcon,
+  Spinner,
   View,
 } from '@gluestack-ui/themed';
+import {and, getDocs, query, where} from 'firebase/firestore';
+import {usersRef} from '@/firebase';
+import {User} from '@/types';
+import {UserRow} from '../UserRow/UserRow';
+import {useAuthContext} from '@/context/auth.context';
 
 interface NewChatModalProps {
   isModalSearchVisible: boolean;
@@ -21,6 +27,52 @@ export const NewChatModal = ({
   isModalSearchVisible,
   handlePressShowModal,
 }: NewChatModalProps) => {
+  const [search, setSearch] = React.useState('');
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const {user} = useAuthContext();
+
+  const onSearch = async (value: string) => {
+    try {
+      const queryUsers = query(
+        usersRef,
+        where('username', '>=', value),
+        where('username', '<=', value + '\uf8ff'),
+      );
+      const usersFound = await getDocs(queryUsers);
+      let users: User[] = [];
+      usersFound.forEach(doc => {
+        if (doc.data().uuid !== user?.uid) {
+          users.push(doc.data() as User);
+        }
+      });
+      setUsers(users);
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSetSearch = (value: string) => {
+    setSearch(value);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      if (value !== '') {
+        setIsLoading(true);
+        onSearch(value.toLowerCase());
+      } else {
+        setUsers([]);
+      }
+    }, 750);
+  };
+
+  const handleCreateChat = (user: User) => {
+    console.log('Create chat with:', user);
+  };
+
   return (
     <Modal
       visible={isModalSearchVisible}
@@ -44,12 +96,26 @@ export const NewChatModal = ({
         </Pressable>
       </View>
       <View flex={1} px="$4">
-        <Input size="md" rounded="$full" mt="$2" px="$0">
+        <Input size="md" rounded="$full" my="$2" px="$0">
           <InputSlot pl="$4">
             <InputIcon as={SearchIcon} />
           </InputSlot>
-          <InputField placeholder="Search name or email" />
+          <InputField
+            placeholder="Search name or email"
+            value={search}
+            onChangeText={handleSetSearch}
+          />
+          <InputSlot pr="$4">
+            {isLoading ? <Spinner color="$trueGray500" /> : null}
+          </InputSlot>
         </Input>
+        <FlatList
+          data={users}
+          keyExtractor={item => item.uuid}
+          renderItem={({item}) => (
+            <UserRow onPress={handleCreateChat} user={item} />
+          )}
+        />
       </View>
     </Modal>
   );
