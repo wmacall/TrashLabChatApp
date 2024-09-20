@@ -13,7 +13,7 @@ import {
 } from 'firebase/firestore';
 import {useState} from 'react';
 
-export const useChat = (handlePressShowModal: () => void) => {
+export const useChat = (handlePressShowModal?: () => void) => {
   const [userChats, setUserChats] = useState<UserChat[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const {user} = useAuthContext();
@@ -62,7 +62,7 @@ export const useChat = (handlePressShowModal: () => void) => {
           guest: userSelected.uuid,
         });
       }
-      handlePressShowModal();
+      handlePressShowModal?.();
       router.push({
         pathname: '/messages',
         params: {
