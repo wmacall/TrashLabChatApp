@@ -1,9 +1,10 @@
 import {useAuthContext} from '@/context/auth.context';
-import {db} from '@/firebase';
+import {db, storage} from '@/firebase';
 import {Ionicons} from '@expo/vector-icons';
 import {ChevronLeftIcon, Pressable, Toast} from '@gluestack-ui/themed';
 import {Heading, Icon, View} from '@gluestack-ui/themed';
 import {router, useLocalSearchParams} from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import {
   addDoc,
   collection,
@@ -22,11 +23,21 @@ import {
   IMessage,
   InputToolbar,
   Send,
+  MessageImage,
+  Bubble,
+  Time,
 } from 'react-native-gifted-chat';
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  listAll,
+} from 'firebase/storage';
 
 const Messages = () => {
   const params = useLocalSearchParams();
-  const [messages, setMessages] = useState<any>([]);
+  const [messages, setMessages] = useState<IMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const {user} = useAuthContext();
   const roomId = String(params.roomId);
@@ -44,6 +55,7 @@ const Messages = () => {
           _id: doc.id,
           text: data.text,
           createdAt: data.createdAt.toDate(),
+          image: data.image,
           user: {
             _id: data.user._id,
           },
@@ -91,6 +103,75 @@ const Messages = () => {
 
   const handleGoBack = () => router.back();
 
+  const uploadToFirebase = async (uri: string) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const storageRef = ref(storage, 'chats/' + new Date().getTime());
+
+    const uploadTask = uploadBytesResumable(storageRef, blob);
+    uploadTask.on(
+      'state_changed',
+      snapshot => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      },
+      error => {},
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then(async downloadURL => {
+          onSendImage(downloadURL);
+        });
+      },
+    );
+  };
+
+  const onSendImage = async (imageURL: string) => {
+    const message: IMessage = {
+      _id: new Date().getTime(),
+      text: '',
+      createdAt: new Date(),
+      user: {
+        _id: user?.uid as string,
+      },
+      image: imageURL,
+    };
+
+    setMessages((previousMessages: any) =>
+      GiftedChat.append(previousMessages, [message]),
+    );
+
+    const roomRef = doc(db, 'rooms', roomId);
+    const messagesRef = collection(roomRef, 'messages');
+
+    await addDoc(messagesRef, {
+      ...message,
+    });
+
+    await updateDoc(roomRef, {
+      lastMessage: {
+        text: 'Image sent',
+        lastMessageAt: message.createdAt,
+        sender: user?.uid,
+      },
+    });
+  };
+
+  const pickImage = async () => {
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        const resultImage = await uploadToFirebase(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
       <View flexDirection="row" alignItems="center" bg="$primary700">
@@ -135,22 +216,92 @@ const Messages = () => {
             }}
           />
         )}
-        renderSend={props => (
-          <Send
+        renderBubble={props => {
+          const isCurrentUser = props.currentMessage?.user._id === user?.uid;
+          const isImageMessage = !!props.currentMessage?.image;
+
+          let backgroundColor;
+          if (isImageMessage) {
+            backgroundColor = '#d3d3d3';
+          } else if (isCurrentUser) {
+            backgroundColor = '#ff6347';
+          } else {
+            backgroundColor = '#32cd32';
+          }
+
+          return (
+            <Bubble
+              {...props}
+              wrapperStyle={{
+                left: {
+                  marginVertical: 5,
+                  backgroundColor: isImageMessage ? '#f3f4f6' : '#32cd32',
+                },
+                right: {
+                  marginVertical: 5,
+                  backgroundColor: isImageMessage ? '#f3f4f6' : '#ff6347',
+                },
+              }}
+              renderTime={props => (
+                <Time
+                  {...props}
+                  timeTextStyle={{
+                    left: {
+                      color: isImageMessage ? '#404040' : '#fff',
+                    },
+                    right: {
+                      color: isImageMessage ? '#404040' : '#fff',
+                    },
+                  }}
+                />
+              )}
+              tickStyle={{
+                color: 'blue',
+              }}
+            />
+          );
+        }}
+        renderMessageImage={props => (
+          <MessageImage
             {...props}
-            disabled={!props.text}
-            alwaysShowSend
             containerStyle={{
-              width: 44,
-              height: 44,
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginHorizontal: 4,
-            }}>
-            <View bg="$primary700" rounded="$full" p="$2">
-              <Ionicons name="send" size={14} color="white" />
-            </View>
-          </Send>
+              backgroundColor: '#f3f4f6',
+              marginVertical: 10,
+            }}
+            imageStyle={{
+              backgroundColor: '#f3f4f6',
+              width: 200,
+              height: 200,
+              borderRadius: 10,
+            }}
+          />
+        )}
+        renderSend={props => (
+          <>
+            <Send
+              {...props}
+              disabled={!props.text}
+              alwaysShowSend
+              containerStyle={{
+                width: 44,
+                height: 44,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginHorizontal: 4,
+              }}>
+              <View bg="$primary700" rounded="$full" p="$2">
+                <Ionicons name="send" size={14} color="white" />
+              </View>
+            </Send>
+            <Pressable
+              onPress={pickImage}
+              bg="$primary700"
+              mr="$4"
+              rounded="$full"
+              p="$2">
+              <Ionicons name="images" size={14} color="white" />
+            </Pressable>
+          </>
         )}
         user={{
           _id: user?.uid as string,
