@@ -5,9 +5,10 @@ import {User} from '@/types';
 interface UserRowProps {
   user: User;
   onPress: (user: User) => void;
+  isDisabled?: boolean;
 }
 
-export const UserRow = ({user, onPress}: UserRowProps) => {
+export const UserRow = ({user, onPress, isDisabled = false}: UserRowProps) => {
   const handlePress = () => {
     onPress(user);
   };
@@ -19,6 +20,7 @@ export const UserRow = ({user, onPress}: UserRowProps) => {
         py="$2"
         flexDirection="row"
         alignItems="center"
+        disabled={isDisabled}
         onPress={handlePress}>
         <View
           w={40}

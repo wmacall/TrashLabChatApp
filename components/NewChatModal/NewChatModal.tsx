@@ -24,7 +24,7 @@ export const NewChatModal = ({
   handlePressShowModal,
 }: NewChatModalProps) => {
   const {handleSetSearch, isLoading, search, users} = useSearch();
-  const {handleCreateChat} = useChat(handlePressShowModal);
+  const {handleCreateChat, isDisabled} = useChat(handlePressShowModal);
 
   return (
     <Modal
@@ -66,7 +66,11 @@ export const NewChatModal = ({
           data={users}
           keyExtractor={item => item.uuid}
           renderItem={({item}) => (
-            <UserRow onPress={handleCreateChat} user={item} />
+            <UserRow
+              isDisabled={isDisabled}
+              onPress={handleCreateChat}
+              user={item}
+            />
           )}
         />
       </View>

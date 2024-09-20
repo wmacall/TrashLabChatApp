@@ -17,6 +17,7 @@ import {useState, useEffect} from 'react';
 export const useChat = (handlePressShowModal?: () => void) => {
   const [userChats, setUserChats] = useState<UserChat[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
   const {user} = useAuthContext();
 
   const handleGetChats = () => {
@@ -50,6 +51,7 @@ export const useChat = (handlePressShowModal?: () => void) => {
 
   const handleCreateChat = async (userSelected: User) => {
     try {
+      setIsDisabled(true);
       const roomId = `${userSelected.uuid}-${user?.uid}`;
       const roomRef = doc(db, 'rooms', roomId);
       const roomSnapshot = await getDoc(roomRef);
@@ -61,6 +63,7 @@ export const useChat = (handlePressShowModal?: () => void) => {
         });
       }
       handlePressShowModal?.();
+      setIsDisabled(false);
       router.push({
         pathname: '/messages',
         params: {
@@ -69,6 +72,7 @@ export const useChat = (handlePressShowModal?: () => void) => {
         },
       });
     } catch (error) {
+      setIsDisabled(false);
       console.log(error);
     }
   };
@@ -84,5 +88,6 @@ export const useChat = (handlePressShowModal?: () => void) => {
     userChats,
     isLoading,
     handleCreateChat,
+    isDisabled,
   };
 };
