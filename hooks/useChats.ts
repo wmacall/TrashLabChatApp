@@ -41,7 +41,17 @@ export const useChat = (handlePressShowModal?: () => void) => {
           guestSnapshot.forEach(doc => {
             guestUser = doc.data() as User;
           });
-          return {...data, guestUser, roomId: doc.id};
+          const ownerRef = collection(db, 'users');
+          const queryForOwner = query(
+            ownerRef,
+            where('uuid', '==', data.createdBy),
+          );
+          const ownerSnapshot = await getDocs(queryForOwner);
+          let ownerUser: User | null = null;
+          ownerSnapshot.forEach(doc => {
+            ownerUser = doc.data() as User;
+          });
+          return {...data, guestUser, ownerUser, roomId: doc.id};
         }
         return null;
       });

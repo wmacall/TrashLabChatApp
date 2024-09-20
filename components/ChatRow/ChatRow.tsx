@@ -12,7 +12,11 @@ export const ChatRow = ({
   ...rest
 }: ChatRowProps) => {
   const {user} = useAuthContext();
-  console.log({guestUser, ...rest, user: user?.uid});
+  console.log({
+    guestUser: guestUser?.uuid,
+    user: user?.uid,
+    owner: rest.ownerUser,
+  });
   const handlePressRow = () => {
     router.push({
       pathname: '/messages',
@@ -25,6 +29,10 @@ export const ChatRow = ({
   const lastMessageText = `${
     user?.uid === lastMessage?.sender ? 'You' : guestUser?.username
   }: ${lastMessage?.text}`;
+  const nameToDisplay =
+    user?.uid === rest.ownerUser?.uuid
+      ? guestUser?.username
+      : rest.ownerUser?.username;
 
   return (
     <Pressable onPress={handlePressRow} py="$4">
@@ -38,11 +46,11 @@ export const ChatRow = ({
           alignItems="center"
           justifyContent="center">
           <Heading color="$white" fontSize={16} fontWeight="bold">
-            {guestUser?.username[0].toUpperCase()}
+            {nameToDisplay ? nameToDisplay[0].toUpperCase() : ''}
           </Heading>
         </View>
         <View ml="$2">
-          <Text>{guestUser?.username}</Text>
+          <Text>{nameToDisplay}</Text>
           {lastMessage ? (
             <Text fontSize="$xs" color="$trueGray500">
               {lastMessageText}
