@@ -1,17 +1,7 @@
 import {ChatRow, EmptyChats, Header, NewChatModal} from '@/components';
 import {useChat} from '@/hooks';
 import {Ionicons} from '@expo/vector-icons';
-import {
-  Input,
-  InputField,
-  InputIcon,
-  InputSlot,
-  Pressable,
-  SearchIcon,
-  Spinner,
-  Text,
-  View,
-} from '@gluestack-ui/themed';
+import {Pressable, Spinner, Text, View} from '@gluestack-ui/themed';
 import {useEffect, useState} from 'react';
 import {FlatList} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -42,12 +32,6 @@ const Home = () => {
       ) : (
         <>
           <View px="$4" flex={1}>
-            <Input size="md" rounded="$full" mt="$2" px="$0" height={48}>
-              <InputSlot pl="$4">
-                <InputIcon as={SearchIcon} />
-              </InputSlot>
-              <InputField placeholder="Search" />
-            </Input>
             <FlatList
               bounces={false}
               showsVerticalScrollIndicator={false}

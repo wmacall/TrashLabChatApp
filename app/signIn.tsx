@@ -65,6 +65,7 @@ export default function SignIn() {
               <Input mt="$4" rounded="$2xl" size="lg">
                 <InputField
                   placeholder="Enter your email"
+                  autoCapitalize="none"
                   value={field.value}
                   onChangeText={field.onChange}
                   keyboardType="email-address"
@@ -80,6 +81,7 @@ export default function SignIn() {
                 <InputField
                   type="password"
                   placeholder="Enter your password"
+                  autoCapitalize="none"
                   value={field.value}
                   onChangeText={field.onChange}
                 />
