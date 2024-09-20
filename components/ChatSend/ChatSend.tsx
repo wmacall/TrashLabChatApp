@@ -41,7 +41,7 @@ export const ChatSend = (props: ChatSendProps) => {
       });
 
       if (!result.canceled) {
-        const resultImage = await uploadToFirebase(result.assets[0].uri);
+        await uploadToFirebase(result.assets[0].uri);
       }
     } catch (error) {
       console.log(error);

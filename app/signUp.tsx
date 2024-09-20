@@ -71,6 +71,7 @@ export default function SignUp() {
             render={({field}) => (
               <Input mt="$4" rounded="$2xl" size="md">
                 <InputField
+                  autoCapitalize="none"
                   placeholder="Enter your email"
                   value={field.value}
                   onChangeText={field.onChange}
@@ -85,6 +86,7 @@ export default function SignUp() {
             render={({field}) => (
               <Input mt="$4" rounded="$2xl" size="md">
                 <InputField
+                  autoCapitalize="none"
                   placeholder="Enter your username"
                   value={field.value}
                   onChangeText={field.onChange}
@@ -98,6 +100,8 @@ export default function SignUp() {
             render={({field}) => (
               <Input mt="$4" rounded="$2xl" size="md">
                 <InputField
+                  autoCapitalize="none"
+                  secureTextEntry
                   type="password"
                   placeholder="Enter your password"
                   value={field.value}

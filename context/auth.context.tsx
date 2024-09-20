@@ -20,7 +20,7 @@ export const AuthContext = createContext({
   isAuthenticated: null as boolean | null,
   onLogin: (_email: string, _password: string) => {},
   onLogout: () => {},
-  onRegister: (_email: string, username: string, _password: string) => {},
+  onRegister: (_email: string, _username: string, _password: string) => {},
   isLoading: false,
 });
 
@@ -33,6 +33,7 @@ export const AuthContextProvider = ({children}: Props) => {
     try {
       setIsLoading(true);
       await signInWithEmailAndPassword(auth, email, password);
+      setIsLoading(false);
     } catch (error) {
       const errorMessage = getMessageFromError(error);
       Alert.alert('Error', errorMessage);

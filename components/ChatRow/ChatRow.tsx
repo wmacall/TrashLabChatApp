@@ -12,27 +12,23 @@ export const ChatRow = ({
   ...rest
 }: ChatRowProps) => {
   const {user} = useAuthContext();
-  console.log({
-    guestUser: guestUser?.uuid,
-    user: user?.uid,
-    owner: rest.ownerUser,
-  });
+  const nameToDisplay =
+    user?.uid === rest.ownerUser?.uuid
+      ? guestUser?.username
+      : rest.ownerUser?.username;
+
   const handlePressRow = () => {
     router.push({
       pathname: '/messages',
       params: {
         roomId,
-        username: guestUser?.username,
+        username: nameToDisplay,
       },
     });
   };
   const lastMessageText = `${
     user?.uid === lastMessage?.sender ? 'You' : guestUser?.username
   }: ${lastMessage?.text}`;
-  const nameToDisplay =
-    user?.uid === rest.ownerUser?.uuid
-      ? guestUser?.username
-      : rest.ownerUser?.username;
 
   return (
     <Pressable onPress={handlePressRow} py="$4">
