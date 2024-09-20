@@ -1,6 +1,5 @@
 import {ChatRow, EmptyChats, NewChatModal} from '@/components';
 import {useChat} from '@/hooks';
-import {User} from '@/types';
 import {Ionicons} from '@expo/vector-icons';
 import {
   Heading,
@@ -14,18 +13,14 @@ import {
   Text,
   View,
 } from '@gluestack-ui/themed';
-import {router} from 'expo-router';
 import {useEffect, useState} from 'react';
 import {FlatList} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const Home = () => {
-  const [users, setUsers] = useState<User[]>([]);
   const {bottom} = useSafeAreaInsets();
   const [isModalSearchVisible, setIsModalSearchVisible] = useState(false);
   const {handleGetChats, userChats, isLoading} = useChat();
-
-  const handlePressUser = (uuid: string) => router.push(`/messages`);
   const handlePressShowModal = () => setIsModalSearchVisible(prev => !prev);
 
   useEffect(() => {
@@ -59,7 +54,7 @@ const Home = () => {
               bounces={false}
               showsVerticalScrollIndicator={false}
               data={userChats}
-              keyExtractor={(_, index) => index.toString()}
+              keyExtractor={chatInfo => chatInfo.roomId}
               renderItem={({item}) => <ChatRow {...item} />}
               ListEmptyComponent={<EmptyChats />}
               contentContainerStyle={{flexGrow: 1}}
