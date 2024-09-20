@@ -1,4 +1,5 @@
-import {EmptyChats} from '@/components';
+import {EmptyChats, NewChatModal} from '@/components';
+import {User} from '@/types';
 import {Ionicons} from '@expo/vector-icons';
 import {
   Heading,
@@ -12,25 +13,23 @@ import {
 } from '@gluestack-ui/themed';
 import {router} from 'expo-router';
 import {useState} from 'react';
-import {FlatList, Text} from 'react-native';
+import {FlatList, Text, Modal} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-
-interface User {
-  uuid: string;
-  username: string;
-  email: string;
-}
 
 const Home = () => {
   const [users, setUsers] = useState<User[]>([]);
   const {bottom} = useSafeAreaInsets();
+  const [isModalSearchVisible, setIsModalSearchVisible] = useState(false);
 
-  const handlePressUser = (uuid: string) => {
-    router.push(`/messages`);
-  };
+  const handlePressUser = (uuid: string) => router.push(`/messages`);
+  const handlePressShowModal = () => setIsModalSearchVisible(prev => !prev);
 
   return (
     <View flex={1}>
+      <NewChatModal
+        handlePressShowModal={handlePressShowModal}
+        isModalSearchVisible={isModalSearchVisible}
+      />
       <Heading color="$white" bg="$primary700" size="2xl" p="$4">
         Chats
       </Heading>
@@ -60,6 +59,7 @@ const Home = () => {
         />
       </View>
       <Pressable
+        onPress={handlePressShowModal}
         position="absolute"
         right="$4"
         bottom={bottom}
