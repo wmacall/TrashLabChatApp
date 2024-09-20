@@ -81,22 +81,25 @@ export const NewChatModal = ({
   };
 
   const handleCreateChat = async (userSelected: User) => {
-    const roomId = `${userSelected.uuid}-${user?.uid}`;
-    const roomRef = doc(db, 'rooms', roomId);
-    const roomSnapshot = await getDoc(roomRef);
-    if (!roomSnapshot.exists()) {
-      await setDoc(roomRef, {
-        createdBy: user?.uid,
+    try {
+      const roomId = `${userSelected.uuid}-${user?.uid}`;
+      const roomRef = doc(db, 'rooms', roomId);
+      const roomSnapshot = await getDoc(roomRef);
+      if (!roomSnapshot.exists()) {
+        await setDoc(roomRef, {
+          createdBy: user?.uid,
+          guest: userSelected.uuid,
+        });
+      }
+      handlePressShowModal();
+      router.push({
+        pathname: '/messages',
+        params: {
+          roomId,
+          username: userSelected.username,
+        },
       });
-    }
-    handlePressShowModal();
-    router.push({
-      pathname: '/messages',
-      params: {
-        roomId,
-        username: userSelected.username,
-      },
-    });
+    } catch (error) {}
   };
 
   return (
