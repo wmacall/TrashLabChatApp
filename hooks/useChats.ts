@@ -44,6 +44,7 @@ export const useChat = (handlePressShowModal: () => void) => {
       });
       rooms = await Promise.all(guestPromises);
       setUserChats(rooms);
+      console.log(rooms);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);

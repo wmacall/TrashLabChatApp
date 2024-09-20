@@ -5,4 +5,9 @@ export interface UserChat {
   guest: string;
   guestUser: User | null;
   roomId: string;
+  lastMessage: {
+    text: string;
+    lastMessageAt: Date;
+    sender: string;
+  };
 }

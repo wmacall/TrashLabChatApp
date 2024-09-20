@@ -11,6 +11,8 @@ import {
   onSnapshot,
   orderBy,
   query,
+  setDoc,
+  updateDoc,
 } from 'firebase/firestore';
 import React, {useState, useCallback, useEffect} from 'react';
 import {SafeAreaView, Text} from 'react-native';
@@ -64,6 +66,13 @@ const Messages = () => {
         );
         const roomRef = doc(db, 'rooms', roomId as string);
         const messagesRef = collection(roomRef, 'messages');
+        await updateDoc(roomRef, {
+          lastMessage: {
+            text: messages[0].text,
+            lastMessageAt: messages[0].createdAt,
+            sender: user?.uid,
+          },
+        });
 
         await addDoc(messagesRef, {
           _id: messages[0]._id,
