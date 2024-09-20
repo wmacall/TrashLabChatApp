@@ -1,9 +1,9 @@
 import {useAuthContext} from '@/context/auth.context';
 import {db} from '@/firebase';
 import {Ionicons} from '@expo/vector-icons';
-import {Box, ChevronLeftIcon, Pressable} from '@gluestack-ui/themed';
+import {ChevronLeftIcon, Pressable, Toast} from '@gluestack-ui/themed';
 import {Heading, Icon, View} from '@gluestack-ui/themed';
-import {router} from 'expo-router';
+import {router, useLocalSearchParams} from 'expo-router';
 import {
   addDoc,
   collection,
@@ -23,13 +23,15 @@ import {
 } from 'react-native-gifted-chat';
 
 const Messages = () => {
+  const params = useLocalSearchParams();
   const [messages, setMessages] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(true);
   const {user} = useAuthContext();
+  const roomId = String(params.roomId);
+  const username = String(params.username);
 
   useEffect(() => {
-    const roomId = '1';
-    const roomRef = doc(db, 'rooms', roomId);
+    const roomRef = doc(db, 'rooms', roomId as string);
     const messagesRef = collection(roomRef, 'messages');
     const q = query(messagesRef, orderBy('createdAt', 'desc'));
 
@@ -60,8 +62,7 @@ const Messages = () => {
         setMessages((previousMessages: any) =>
           GiftedChat.append(previousMessages, messages),
         );
-        const roomId = '1';
-        const roomRef = doc(db, 'rooms', roomId);
+        const roomRef = doc(db, 'rooms', roomId as string);
         const messagesRef = collection(roomRef, 'messages');
 
         await addDoc(messagesRef, {
@@ -73,7 +74,7 @@ const Messages = () => {
           text: messages[0].text,
         });
       } catch (error) {
-        console.error('Error al enviar mensaje: ', error);
+        Toast;
       }
     },
     [user?.uid],
@@ -88,7 +89,7 @@ const Messages = () => {
           <Icon as={ChevronLeftIcon} color="$white" size="xl" />
         </Pressable>
         <Heading color="$white" size="md">
-          Diego Smith
+          {username}
         </Heading>
       </View>
 

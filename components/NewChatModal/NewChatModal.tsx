@@ -12,11 +12,22 @@ import {
   Spinner,
   View,
 } from '@gluestack-ui/themed';
-import {and, getDocs, query, where} from 'firebase/firestore';
-import {usersRef} from '@/firebase';
+import {
+  addDoc,
+  and,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from 'firebase/firestore';
+import {db, usersRef} from '@/firebase';
 import {User} from '@/types';
 import {UserRow} from '../UserRow/UserRow';
 import {useAuthContext} from '@/context/auth.context';
+import {router} from 'expo-router';
 
 interface NewChatModalProps {
   isModalSearchVisible: boolean;
@@ -69,8 +80,23 @@ export const NewChatModal = ({
     }, 750);
   };
 
-  const handleCreateChat = (user: User) => {
-    console.log('Create chat with:', user);
+  const handleCreateChat = async (userSelected: User) => {
+    const roomId = `${userSelected.uuid}-${user?.uid}`;
+    const roomRef = doc(db, 'rooms', roomId);
+    const roomSnapshot = await getDoc(roomRef);
+    if (!roomSnapshot.exists()) {
+      await setDoc(roomRef, {
+        createdBy: user?.uid,
+      });
+    }
+    handlePressShowModal();
+    router.push({
+      pathname: '/messages',
+      params: {
+        roomId,
+        username: userSelected.username,
+      },
+    });
   };
 
   return (
