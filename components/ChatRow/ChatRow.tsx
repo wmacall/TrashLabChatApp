@@ -17,8 +17,8 @@ export const ChatRow = ({guestUser, roomId, lastMessage}: ChatRowProps) => {
     });
   };
   const lastMessageText = `${
-    user?.uid === lastMessage.sender ? 'You' : guestUser?.username
-  }: ${lastMessage.text}`;
+    user?.uid === lastMessage?.sender ? 'You' : guestUser?.username
+  }: ${lastMessage?.text}`;
 
   return (
     <Pressable onPress={handlePressRow} py="$4">
@@ -37,9 +37,11 @@ export const ChatRow = ({guestUser, roomId, lastMessage}: ChatRowProps) => {
         </View>
         <View ml="$2">
           <Text>{guestUser?.username}</Text>
-          <Text fontSize="$xs" color="$trueGray500">
-            {lastMessageText}
-          </Text>
+          {lastMessage ? (
+            <Text fontSize="$xs" color="$trueGray500">
+              {lastMessageText}
+            </Text>
+          ) : null}
         </View>
       </View>
       <View borderBottomWidth={1} borderBottomColor="$trueGray200" mt="$4" />

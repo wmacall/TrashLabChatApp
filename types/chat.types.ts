@@ -9,5 +9,5 @@ export interface UserChat {
     text: string;
     lastMessageAt: Date;
     sender: string;
-  };
+  } | null;
 }

@@ -6,28 +6,25 @@ import {
   collection,
   doc,
   getDoc,
-  getDocs,
-  query,
   setDoc,
+  query,
   where,
+  onSnapshot,
+  getDocs,
 } from 'firebase/firestore';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 
 export const useChat = (handlePressShowModal?: () => void) => {
   const [userChats, setUserChats] = useState<UserChat[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const {user} = useAuthContext();
 
-  const handleGetChats = async () => {
-    try {
-      setIsLoading(true);
-      const roomsRef = collection(db, 'rooms');
-      const queryForRooms = query(
-        roomsRef,
-        where('createdBy', '==', user?.uid),
-      );
+  const handleGetChats = () => {
+    setIsLoading(true);
+    const roomsRef = collection(db, 'rooms');
+    const queryForRooms = query(roomsRef, where('createdBy', '==', user?.uid));
 
-      const roomsSnapshot = await getDocs(queryForRooms);
+    const unsubscribe = onSnapshot(queryForRooms, async roomsSnapshot => {
       let rooms: UserChat[] = [];
       const guestPromises = roomsSnapshot.docs.map(async doc => {
         const data = doc.data() as UserChat;
@@ -42,13 +39,13 @@ export const useChat = (handlePressShowModal?: () => void) => {
         });
         return {...data, guestUser, roomId: doc.id};
       });
+
       rooms = await Promise.all(guestPromises);
       setUserChats(rooms);
-      console.log(rooms);
       setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
-    }
+    });
+
+    return unsubscribe;
   };
 
   const handleCreateChat = async (userSelected: User) => {
@@ -60,6 +57,7 @@ export const useChat = (handlePressShowModal?: () => void) => {
         await setDoc(roomRef, {
           createdBy: user?.uid,
           guest: userSelected.uuid,
+          lastMessage: null,
         });
       }
       handlePressShowModal?.();
@@ -70,8 +68,16 @@ export const useChat = (handlePressShowModal?: () => void) => {
           username: userSelected.username,
         },
       });
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  useEffect(() => {
+    const unsubscribe = handleGetChats();
+
+    return () => unsubscribe();
+  }, []);
 
   return {
     handleGetChats,
