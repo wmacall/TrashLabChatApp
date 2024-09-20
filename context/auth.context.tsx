@@ -4,9 +4,9 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
   User,
+  signOut,
 } from 'firebase/auth';
 import {auth, db} from '../firebase';
-import {FirebaseError} from 'firebase/app';
 import {Alert} from 'react-native';
 import {getMessageFromError} from '@/utils/getMessageFromError';
 import {doc, setDoc} from 'firebase/firestore';
@@ -39,7 +39,9 @@ export const AuthContextProvider = ({children}: Props) => {
       setIsLoading(false);
     }
   };
-  const onLogout = () => {};
+  const onLogout = () => {
+    signOut(auth);
+  };
   const onRegister = async (
     email: string,
     username: string,

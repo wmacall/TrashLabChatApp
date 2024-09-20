@@ -1,8 +1,7 @@
-import {ChatRow, EmptyChats, NewChatModal} from '@/components';
+import {ChatRow, EmptyChats, Header, NewChatModal} from '@/components';
 import {useChat} from '@/hooks';
 import {Ionicons} from '@expo/vector-icons';
 import {
-  Heading,
   Input,
   InputField,
   InputIcon,
@@ -20,6 +19,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 const Home = () => {
   const {bottom} = useSafeAreaInsets();
   const [isModalSearchVisible, setIsModalSearchVisible] = useState(false);
+
   const {handleGetChats, userChats, isLoading} = useChat();
   const handlePressShowModal = () => setIsModalSearchVisible(prev => !prev);
 
@@ -33,9 +33,7 @@ const Home = () => {
         handlePressShowModal={handlePressShowModal}
         isModalSearchVisible={isModalSearchVisible}
       />
-      <Heading color="$white" bg="$primary700" size="2xl" p="$4">
-        Chats
-      </Heading>
+      <Header />
       {isLoading ? (
         <View flex={1} justifyContent="center" alignItems="center">
           <Spinner size="large" color="$primary700" />
