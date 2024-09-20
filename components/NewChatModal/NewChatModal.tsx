@@ -1,4 +1,3 @@
-import React, {useRef, useState} from 'react';
 import {FlatList, Modal} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {
@@ -12,22 +11,8 @@ import {
   Spinner,
   View,
 } from '@gluestack-ui/themed';
-import {
-  addDoc,
-  and,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  setDoc,
-  where,
-} from 'firebase/firestore';
-import {db, usersRef} from '@/firebase';
-import {User} from '@/types';
 import {UserRow} from '../UserRow/UserRow';
-import {useAuthContext} from '@/context/auth.context';
-import {router} from 'expo-router';
+import {useChat, useSearch} from '@/hooks';
 
 interface NewChatModalProps {
   isModalSearchVisible: boolean;
@@ -38,69 +23,8 @@ export const NewChatModal = ({
   isModalSearchVisible,
   handlePressShowModal,
 }: NewChatModalProps) => {
-  const [search, setSearch] = React.useState('');
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const {user} = useAuthContext();
-
-  const onSearch = async (value: string) => {
-    try {
-      const queryUsers = query(
-        usersRef,
-        where('username', '>=', value),
-        where('username', '<=', value + '\uf8ff'),
-      );
-      const usersFound = await getDocs(queryUsers);
-      let users: User[] = [];
-      usersFound.forEach(doc => {
-        if (doc.data().uuid !== user?.uid) {
-          users.push(doc.data() as User);
-        }
-      });
-      setUsers(users);
-      setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSetSearch = (value: string) => {
-    setSearch(value);
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      if (value !== '') {
-        setIsLoading(true);
-        onSearch(value.toLowerCase());
-      } else {
-        setUsers([]);
-      }
-    }, 750);
-  };
-
-  const handleCreateChat = async (userSelected: User) => {
-    try {
-      const roomId = `${userSelected.uuid}-${user?.uid}`;
-      const roomRef = doc(db, 'rooms', roomId);
-      const roomSnapshot = await getDoc(roomRef);
-      if (!roomSnapshot.exists()) {
-        await setDoc(roomRef, {
-          createdBy: user?.uid,
-          guest: userSelected.uuid,
-        });
-      }
-      handlePressShowModal();
-      router.push({
-        pathname: '/messages',
-        params: {
-          roomId,
-          username: userSelected.username,
-        },
-      });
-    } catch (error) {}
-  };
+  const {handleSetSearch, isLoading, search, users} = useSearch();
+  const {handleCreateChat} = useChat(handlePressShowModal);
 
   return (
     <Modal

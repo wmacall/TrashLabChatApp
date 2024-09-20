@@ -1,10 +1,19 @@
 import {useAuthContext} from '@/context/auth.context';
 import {db} from '@/firebase';
 import {User, UserChat} from '@/types';
-import {collection, getDocs, query, where} from 'firebase/firestore';
+import {router} from 'expo-router';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from 'firebase/firestore';
 import {useState} from 'react';
 
-export const useChat = () => {
+export const useChat = (handlePressShowModal: () => void) => {
   const [userChats, setUserChats] = useState<UserChat[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const {user} = useAuthContext();
@@ -41,9 +50,32 @@ export const useChat = () => {
     }
   };
 
+  const handleCreateChat = async (userSelected: User) => {
+    try {
+      const roomId = `${userSelected.uuid}-${user?.uid}`;
+      const roomRef = doc(db, 'rooms', roomId);
+      const roomSnapshot = await getDoc(roomRef);
+      if (!roomSnapshot.exists()) {
+        await setDoc(roomRef, {
+          createdBy: user?.uid,
+          guest: userSelected.uuid,
+        });
+      }
+      handlePressShowModal();
+      router.push({
+        pathname: '/messages',
+        params: {
+          roomId,
+          username: userSelected.username,
+        },
+      });
+    } catch (error) {}
+  };
+
   return {
     handleGetChats,
     userChats,
     isLoading,
+    handleCreateChat,
   };
 };
