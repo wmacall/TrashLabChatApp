@@ -20,7 +20,6 @@ const MainLayout = () => {
       return;
     }
     const isLogged = segments[0] === '(app)';
-    console.log(isAuthenticated && !isLogged);
     if (isAuthenticated && !isLogged) {
       replace('/home');
     } else if (!isAuthenticated) {
