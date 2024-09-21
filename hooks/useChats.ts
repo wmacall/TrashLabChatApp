@@ -29,32 +29,34 @@ export const useChat = (handlePressShowModal?: () => void) => {
         const data = doc.data() as UserChat;
         const roomId = doc.id;
         const [user1, user2] = roomId.split('-');
-
         if (user1 === user?.uid || user2 === user?.uid) {
-          const guestRef = collection(db, 'users');
-          const queryForGuest = query(
-            guestRef,
-            where('uuid', '==', data.guest),
-          );
-          const guestSnapshot = await getDocs(queryForGuest);
-          let guestUser: User | null = null;
-          guestSnapshot.forEach(doc => {
-            guestUser = doc.data() as User;
-          });
-          const ownerRef = collection(db, 'users');
-          const queryForOwner = query(
-            ownerRef,
-            where('uuid', '==', data.createdBy),
-          );
-          const ownerSnapshot = await getDocs(queryForOwner);
-          let ownerUser: User | null = null;
-          ownerSnapshot.forEach(doc => {
-            ownerUser = doc.data() as User;
-          });
-          return {...data, guestUser, ownerUser, roomId: doc.id};
+          if (data.lastMessage !== null) {
+            const guestRef = collection(db, 'users');
+            const queryForGuest = query(
+              guestRef,
+              where('uuid', '==', data.guest),
+            );
+            const guestSnapshot = await getDocs(queryForGuest);
+            let guestUser: User | null = null;
+            guestSnapshot.forEach(doc => {
+              guestUser = doc.data() as User;
+            });
+            const ownerRef = collection(db, 'users');
+            const queryForOwner = query(
+              ownerRef,
+              where('uuid', '==', data.createdBy),
+            );
+            const ownerSnapshot = await getDocs(queryForOwner);
+            let ownerUser: User | null = null;
+            ownerSnapshot.forEach(doc => {
+              ownerUser = doc.data() as User;
+            });
+            return {...data, guestUser, ownerUser, roomId: doc.id};
+          }
         }
         return null;
       });
+
       rooms = (await Promise.all(guestPromises)).filter(
         room => room !== null,
       ) as UserChat[];
