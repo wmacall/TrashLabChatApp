@@ -9,7 +9,7 @@ import {
 import {auth, db} from '../firebase';
 import {Alert} from 'react-native';
 import {getMessageFromError} from '@/utils/getMessageFromError';
-import {doc, setDoc} from 'firebase/firestore';
+import {doc, getDoc, setDoc} from 'firebase/firestore';
 
 type Props = {
   children: ReactNode;
@@ -22,17 +22,32 @@ export const AuthContext = createContext({
   onLogout: () => {},
   onRegister: (_email: string, _username: string, _password: string) => {},
   isLoading: false,
+  username: null as string | null,
 });
 
 export const AuthContextProvider = ({children}: Props) => {
   const [user, setUser] = useState<null | User>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [username, setUsername] = useState<string | null>(null);
+
+  const getUsername = async (uid: string) => {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setUsername(userData.username);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to get user details');
+    }
+  };
 
   const onLogin = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
+      const response = await signInWithEmailAndPassword(auth, email, password);
+      await getUsername(response.user.uid);
       setIsLoading(false);
     } catch (error) {
       const errorMessage = getMessageFromError(error);
@@ -42,6 +57,7 @@ export const AuthContextProvider = ({children}: Props) => {
   };
   const onLogout = () => {
     signOut(auth);
+    setUsername(null);
   };
   const onRegister = async (
     email: string,
@@ -60,6 +76,7 @@ export const AuthContextProvider = ({children}: Props) => {
         username,
         uuid: response.user.uid,
       });
+      setUsername(username);
       setIsLoading(false);
     } catch (error) {
       const errorMessage = getMessageFromError(error);
@@ -69,8 +86,9 @@ export const AuthContextProvider = ({children}: Props) => {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, user => {
+    const unsubscribe = onAuthStateChanged(auth, async user => {
       if (user) {
+        await getUsername(user.uid);
         setUser(user);
         setIsAuthenticated(true);
       } else {
@@ -93,6 +111,7 @@ export const AuthContextProvider = ({children}: Props) => {
         onLogout,
         onRegister,
         isLoading,
+        username,
       }}>
       {children}
     </AuthContext.Provider>
