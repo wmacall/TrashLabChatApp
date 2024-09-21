@@ -1,7 +1,15 @@
+import React, {useState, useCallback, useEffect} from 'react';
 import {useAuthContext} from '@/context/auth.context';
 import {db} from '@/firebase';
-import {ChevronLeftIcon, Pressable, Toast} from '@gluestack-ui/themed';
-import {Heading, Icon, View} from '@gluestack-ui/themed';
+import {
+  ChevronLeftIcon,
+  Pressable,
+  Toast,
+  Heading,
+  Icon,
+  View,
+  Text,
+} from '@gluestack-ui/themed';
 import {router, useLocalSearchParams} from 'expo-router';
 import {
   addDoc,
@@ -12,7 +20,6 @@ import {
   query,
   updateDoc,
 } from 'firebase/firestore';
-import React, {useState, useCallback, useEffect} from 'react';
 import {SafeAreaView} from 'react-native';
 import {
   Composer,
@@ -26,7 +33,8 @@ import {ChatMessage, ChatSend} from '@/components';
 const Messages = () => {
   const params = useLocalSearchParams();
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const {user} = useAuthContext();
   const roomId = String(params.roomId);
   const username = String(params.username);
@@ -50,7 +58,6 @@ const Messages = () => {
         };
       });
       setMessages(messages);
-      setIsLoading(false);
     });
 
     return () => {
@@ -132,7 +139,6 @@ const Messages = () => {
           {username}
         </Heading>
       </View>
-
       <GiftedChat
         messages={messages}
         onSend={messages => onSend(messages)}
@@ -145,14 +151,29 @@ const Messages = () => {
           backgroundColor: '#fff',
         }}
         renderInputToolbar={props => (
-          <InputToolbar
-            {...props}
-            containerStyle={{
-              paddingTop: 6,
-              borderTopWidth: 0,
-            }}
-            primaryStyle={{alignItems: 'center', flexDirection: 'row'}}
-          />
+          <>
+            <InputToolbar
+              {...props}
+              containerStyle={{
+                paddingTop: 6,
+                borderTopWidth: 0,
+              }}
+              primaryStyle={{alignItems: 'center', flexDirection: 'row'}}
+            />
+            {uploadingImage && (
+              <View
+                position="absolute"
+                width="$full"
+                py="$2"
+                style={{
+                  backgroundColor: 'rgba(0,0,0,0.6)',
+                }}
+                alignItems="center"
+                justifyContent="center">
+                <Text color="white">Uploading Image... {progress}%</Text>
+              </View>
+            )}
+          </>
         )}
         renderComposer={props => (
           <Composer
@@ -168,7 +189,14 @@ const Messages = () => {
         )}
         renderBubble={props => <ChatBubble {...props} />}
         renderMessageImage={props => <ChatMessage {...props} />}
-        renderSend={props => <ChatSend onSendImage={onSendImage} {...props} />}
+        renderSend={props => (
+          <ChatSend
+            onSendImage={onSendImage}
+            setProgress={setProgress}
+            setUploadingImage={setUploadingImage}
+            {...props}
+          />
+        )}
         user={{
           _id: user?.uid as string,
         }}

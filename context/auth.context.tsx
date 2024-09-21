@@ -9,7 +9,15 @@ import {
 import {auth, db} from '../firebase';
 import {Alert} from 'react-native';
 import {getMessageFromError} from '@/utils/getMessageFromError';
-import {doc, getDoc, setDoc} from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from 'firebase/firestore';
 
 type Props = {
   children: ReactNode;
@@ -65,7 +73,16 @@ export const AuthContextProvider = ({children}: Props) => {
     password: string,
   ) => {
     setIsLoading(true);
+
     try {
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('username', '==', username));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        Alert.alert('Error', 'Username already exists');
+        setIsLoading(false);
+        return;
+      }
       const response = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -76,6 +93,7 @@ export const AuthContextProvider = ({children}: Props) => {
         username,
         uuid: response.user.uid,
       });
+
       setUsername(username);
       setIsLoading(false);
     } catch (error) {

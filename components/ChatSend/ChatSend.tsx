@@ -1,16 +1,20 @@
 import {Ionicons} from '@expo/vector-icons';
-import {View, Pressable} from '@gluestack-ui/themed';
+import {View, Pressable, Text} from '@gluestack-ui/themed';
 import {IMessage, Send, SendProps} from 'react-native-gifted-chat';
 import * as ImagePicker from 'expo-image-picker';
 import {getDownloadURL, ref, uploadBytesResumable} from 'firebase/storage';
 import {storage} from '@/firebase';
+import {Alert} from 'react-native';
 
 interface ChatSendProps extends SendProps<IMessage> {
   onSendImage: (url: string) => void;
+  setProgress: (progress: number) => void;
+  setUploadingImage: (uploading: boolean) => void;
 }
 
 export const ChatSend = (props: ChatSendProps) => {
   const uploadToFirebase = async (uri: string) => {
+    props.setUploadingImage(true);
     const response = await fetch(uri);
     const blob = await response.blob();
     const storageRef = ref(storage, 'chats/' + new Date().getTime());
@@ -19,13 +23,18 @@ export const ChatSend = (props: ChatSendProps) => {
     uploadTask.on(
       'state_changed',
       snapshot => {
-        const progress =
+        const progressPercent =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        props.setProgress(Math.round(progressPercent));
       },
-      error => {},
+      error => {
+        props.setUploadingImage(false);
+        Alert.alert('Error', 'Error uploading image');
+      },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then(async downloadURL => {
           props.onSendImage(downloadURL);
+          props.setUploadingImage(false);
         });
       },
     );

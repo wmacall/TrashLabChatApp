@@ -28,6 +28,7 @@ export default function SignUp() {
     defaultValues: {
       email: '',
       password: '',
+      username: '',
     },
   });
 

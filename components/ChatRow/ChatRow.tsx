@@ -27,7 +27,7 @@ export const ChatRow = ({
     });
   };
   const lastMessageText = `${
-    user?.uid === lastMessage?.sender ? 'You' : guestUser?.username
+    user?.uid === lastMessage?.sender ? 'You' : nameToDisplay
   }: ${lastMessage?.text}`;
 
   return (
