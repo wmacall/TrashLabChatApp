@@ -1,4 +1,4 @@
-# Welcome to your Expo app 👋
+# TrashLab Challenge
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
@@ -16,35 +16,30 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
     npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## Design
+The design, while not particularly flashy, was inspired by the WhatsApp home screen and some designs I found on Dribbble. The company logo was incorporated into the layout.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Development Process
+With limited experience using Expo, I had to research how to manage navigation, the differences between slot and stack navigation, and how to handle routes through files. This approach felt familiar since Next.js uses a similar method. Initially, I didn't plan to use any UI library, but due to practical considerations and time constraints, I decided to use [Gluestack v1](https://github.com/) (insert the link to its GitHub here). I chose the [GiftedChat]([https://github.com/FaridSafi/GiftedChat](https://github.com/FaridSafi/react-native-gifted-chat)) library for its simplicity.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Additionally, I utilized the [Image Picker](https://docs.expo.dev/versions/latest/sdk/imagepicker/) from Expo. I implemented several hooks, although I didn't separate them all into their respective files, primarily to demonstrate the use of custom hooks. I would have liked to create a better UI for the images, but time limitations led me to the current solution. The same applies to the testing process.
 
-## Get a fresh project
+I used Context because Expo's documentation recommends it, and Firebase has a method for data persistence. If that option hadn't been available, I would have opted for [Redux Persist](https://github.com/rt2zz/redux-persist) and [RTK](https://redux-toolkit.js.org/).
 
-When you're ready, run:
+## Behavior
 
-```bash
-npm run reset-project
-```
+## Logout and persistance of the session
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Logout and persistance of the session
+https://github.com/user-attachments/assets/b2eb9d53-e445-419f-8773-b38923939072
 
-## Learn more
+## Validations for signup
 
-To learn more about developing your project with Expo, look at the following resources:
+https://github.com/user-attachments/assets/353d03b9-aeee-4cca-8b34-8b29e191f08c
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Complete flow
+https://drive.google.com/file/d/1Bn5WTFcMPxwrWtiOHbiL6YJPamn1XJsJ/view?usp=sharing
 
-## Join the community
 
-Join our community of developers creating universal apps.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
