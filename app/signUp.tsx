@@ -89,7 +89,7 @@ export default function SignUp() {
                   autoCapitalize="none"
                   placeholder="Enter your username"
                   value={field.value}
-                  onChangeText={field.onChange}
+                  onChangeText={value => field.onChange(value.toLowerCase())}
                 />
               </Input>
             )}
